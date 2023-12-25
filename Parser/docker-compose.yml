@@ -1,0 +1,51 @@
+version: '3'
+
+services:
+  # App Service
+  web_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    depends_on:
+      - mongo
+      - rabbitmq
+    networks:
+      - parser_network
+    env_file:
+      - .env
+
+  # MongoDB Service
+  mongo:
+    image: mongo:7.0.4-jammy
+    container_name: mongo-container
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: user
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - parser_network
+
+  # RabbitMQ Service
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq-container
+
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: user
+      RABBITMQ_DEFAULT_PASS: user
+    networks:
+      - parser_network
+
+networks:
+  parser_network:
+    driver: bridge
+
+volumes:
+  mongo_data:
